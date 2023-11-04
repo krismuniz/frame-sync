@@ -1,4 +1,4 @@
-# frame-sync
+# `@printloop/frame-sync`
 
 A minimal iframe synchronization library for React with runtime type checking via Zod.
 
@@ -8,7 +8,7 @@ A minimal iframe synchronization library for React with runtime type checking vi
 ## Installation
 
 ```bash
-npm install --save frame-sync
+npm install --save @printloop/frame-sync
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ npm install --save frame-sync
 
 ```tsx
 import { z } from 'zod';
-import { getGuestFrame } from 'frame-sync';
+import { getGuestFrame } from '@printloop/frame-sync';
 
 const schema = z.object({
   name: z.string(),
@@ -49,7 +49,7 @@ const GuestFrame = getGuestFrame({
 
 ```tsx
 import { z } from 'zod';
-import { getHost } from 'frame-sync';
+import { getHost } from '@printloop/frame-sync';
 
 const schema = z.object({
   name: z.string(),
