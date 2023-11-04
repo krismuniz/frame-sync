@@ -1,19 +1,19 @@
 import { z } from 'zod';
-import React, { createContext, useCallback, useEffect, useRef, useState, useSyncExternalStore, forwardRef } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState, useSyncExternalStore, forwardRef } from 'react';
 
 type HostFrameProps<T extends z.util.flatten<T>> = React.IframeHTMLAttributes<HTMLIFrameElement> & T;
 
 /**
  * Merges multiple refs into a single ref callback.
- * 
+ *
  * source: github.com/gregberge/react-merge-refs
  */
 function mergeRefs<T = any>(
-  refs: Array<React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null>
+  refs: Array<React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null>,
 ): React.RefCallback<T> {
   return (value) => {
     refs.forEach((ref) => {
-      if (typeof ref === "function") {
+      if (typeof ref === 'function') {
         ref(value);
       } else if (ref != null) {
         (ref as React.MutableRefObject<T | null>).current = value;
@@ -31,7 +31,10 @@ export function getGuestFrame<T extends z.Schema<unknown>>({
   schema: T;
   targetOrigin?: string;
 }) {
-  return forwardRef(function GuestFrame({ ...props }: HostFrameProps<z.infer<T>>, parentRef: React.Ref<HTMLIFrameElement>) {
+  return forwardRef(function GuestFrame(
+    { ...props }: HostFrameProps<z.infer<T>>,
+    parentRef: React.Ref<HTMLIFrameElement>,
+  ) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [, setLoaded] = useState(false);
     const attributes = schema.parse(props);
@@ -133,14 +136,16 @@ export const getHost = function <T extends z.Schema<unknown>>({
     }
   }
 
-  document.addEventListener(
-    'DOMContentLoaded',
-    () => {
-      window.addEventListener('message', handleMessage);
-      window.parent.postMessage({ type: 'ready' }, targetOrigin);
-    },
-    { once: true },
-  );
+  function init() {
+    window.addEventListener('message', handleMessage);
+    window.parent.postMessage({ type: 'ready' }, targetOrigin);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 
   return {
     Context: HostContext,
