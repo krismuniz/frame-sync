@@ -1,7 +1,7 @@
 {
   "name": "@printloop/frame-sync",
   "description": "Minimal iframe synchronization for React with Zod validation",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/frame-sync.js",
   "module": "dist/frame-sync.js",

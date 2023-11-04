@@ -96,9 +96,7 @@ export const getHost = function <T extends z.Schema<unknown>>({
   targetOrigin?: string;
 }) {
   let value: T | undefined;
-
   const attributes = schema.parse(initial);
-  const HostContext = createContext<z.infer<T>>(attributes);
 
   function getSnapshot(): z.infer<T> {
     return value ?? attributes;
@@ -148,13 +146,8 @@ export const getHost = function <T extends z.Schema<unknown>>({
   }
 
   return {
-    Context: HostContext,
-    Provider({ children }: { children: React.ReactNode }) {
-      const value = useSyncExternalStore(subscribe, getSnapshot);
-      return <HostContext.Provider value={value}>{children}</HostContext.Provider>;
-    },
-    destroy() {
-      window.removeEventListener('message', handleMessage);
+    useHostProps(): z.infer<T> {
+      return useSyncExternalStore(subscribe, getSnapshot);
     },
   };
 };
