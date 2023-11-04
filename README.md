@@ -2,7 +2,7 @@
 
 A minimal iframe synchronization library for React with runtime type checking via Zod.
 
-> **NOTE**:
+> **NOTE**
 > I thought about this API for half a second, so it's probably not the best. I haven't even written tests for it yet. Use at your own risk.
 
 ## Installation
@@ -42,10 +42,9 @@ const GuestFrame = getGuestFrame({
 
 ### Guest
 
-1. Create a Zod schema for the data you want to receive from the host
+1. Create a Zod schema for the data you expect to receive from the host
 2. Create a `Host` object with the schema, the origin of the host, and initial state to use before the host sends data
-3. Provide the Host context to your app via `Host.Provider`
-4. Consume the data from the Host object's React context via `useContext(Host.Context)`
+3. Consume the data from the `Host` through `useHostProps`
 
 ```tsx
 import { z } from 'zod';
@@ -57,7 +56,7 @@ const schema = z.object({
   email: z.string().optional(),
 });
 
-const Host = getHost({
+const { useHostProps } = getHost({
   schema,
   // the origin of the host
   origin: "http://host-url.com",
@@ -69,19 +68,8 @@ const Host = getHost({
   }
 });
 
-export function GuestApp () {
-  return (
-    <Host.Provider>
-      <App />
-    </Host.Provider>
-  );
-}
-```
-
-```tsx
-// in a child component
 export function SomeGuestComponent () {
-  const { name, age, email } = useContext(Host.Context);
+  const { name, age, email } = useHostProps(Host.Context);
 
   return (
     <div>
@@ -92,8 +80,6 @@ export function SomeGuestComponent () {
   );
 }
 ```
-
-If you want to stop listening to events from the host, you can call `Host.destroy()`.
 
 ## License
 
