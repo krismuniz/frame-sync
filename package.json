@@ -1,0 +1,21 @@
+{
+  "name": "sync-frame",
+  "version": "0.0.1",
+  "description": "Synchronize props between iframes and their parents.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsup src/sync-frame.tsx --clean --minify --sourcemap --dts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kristian Muniz <contact@krismuniz.com> (https://krismuniz.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^18.2.34",
+    "tsup": "^7.2.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "zod": "^3.22.4"
+  }
+}
