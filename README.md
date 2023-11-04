@@ -32,9 +32,9 @@ const schema = z.object({
 const GuestFrame = getGuestFrame({
   schema,
   // the URL of the guest
-  src: "http://guest-url.com/path/to/page",
+  src: "https://guest-url.com/path/to/page",
   // the origin of the guest
-  targetOrigin: "http://guest-url.com",
+  targetOrigin: "https://guest-url.com",
 });
 
 <GuestFrame name="Randall" age={50} email="randall@printloop.dev" />;
