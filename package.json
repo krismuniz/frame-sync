@@ -1,16 +1,22 @@
 {
   "name": "frame-sync",
+  "description": "Minimal iframe synchronization for React with Zod validation",
   "version": "0.0.1",
-  "description": "Synchronize props between iframes and their parents.",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/frame-sync.js",
+  "module": "dist/frame-sync.js",
+  "types": "dist/frame-sync.d.ts",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist",
+    "src"
+  ],
   "scripts": {
     "prepublish": "npm run build",
-    "build": "tsup src/frame-sync.tsx --clean --minify --sourcemap --dts",
+    "build": "tsup src/frame-sync.tsx --format esm --target esnext --platform browser --minify --sourcemap --dts --clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "Kristian Muniz <contact@krismuniz.com> (https://krismuniz.com)",
-  "license": "MIT",
   "devDependencies": {
     "@types/react": "^18.2.34",
     "tsup": "^7.2.0"
@@ -18,5 +24,20 @@
   "peerDependencies": {
     "react": "^18.2.0",
     "zod": "^3.22.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/krismuniz/frame-sync.git"
+  },
+  "keywords": [
+    "react",
+    "iframe",
+    "guest",
+    "host",
+    "embed",
+    "embeddable",
+    "zod"
+  ],
+  "author": "Kristian Muniz <contact@krismuniz.com> (https://krismuniz.com)",
+  "license": "MIT"
 }
