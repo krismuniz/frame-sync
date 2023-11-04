@@ -1,7 +1,26 @@
 import { z } from 'zod';
-import React, { createContext, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import React, { createContext, useCallback, useEffect, useRef, useState, useSyncExternalStore, forwardRef } from 'react';
 
 type HostFrameProps<T extends z.util.flatten<T>> = React.IframeHTMLAttributes<HTMLIFrameElement> & T;
+
+/**
+ * Merges multiple refs into a single ref callback.
+ * 
+ * source: github.com/gregberge/react-merge-refs
+ */
+function mergeRefs<T = any>(
+  refs: Array<React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null>
+): React.RefCallback<T> {
+  return (value) => {
+    refs.forEach((ref) => {
+      if (typeof ref === "function") {
+        ref(value);
+      } else if (ref != null) {
+        (ref as React.MutableRefObject<T | null>).current = value;
+      }
+    });
+  };
+}
 
 export function getGuestFrame<T extends z.Schema<unknown>>({
   src,
@@ -12,7 +31,7 @@ export function getGuestFrame<T extends z.Schema<unknown>>({
   schema: T;
   targetOrigin?: string;
 }) {
-  return function GuestFrame({ ...props }: HostFrameProps<z.infer<T>>) {
+  return forwardRef(function GuestFrame({ ...props }: HostFrameProps<z.infer<T>>, parentRef: React.Ref<HTMLIFrameElement>) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [, setLoaded] = useState(false);
     const attributes = schema.parse(props);
@@ -60,8 +79,8 @@ export function getGuestFrame<T extends z.Schema<unknown>>({
       updateAttributes(attributes);
     }, [attributes, updateAttributes]);
 
-    return <iframe title={props.title} {...props} src={src} ref={iframeRef} />;
-  };
+    return <iframe title={props.title} {...props} src={src} ref={mergeRefs([parentRef, iframeRef])} />;
+  });
 }
 
 export const getHost = function <T extends z.Schema<unknown>>({
