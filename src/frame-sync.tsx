@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createContext, useCallback, useEffect, useRef, useState, useSyncExternalStore, forwardRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, forwardRef } from 'react';
 
 type HostFrameProps<T extends z.util.flatten<T>> = React.IframeHTMLAttributes<HTMLIFrameElement> & T;
 
@@ -8,7 +8,7 @@ type HostFrameProps<T extends z.util.flatten<T>> = React.IframeHTMLAttributes<HT
  *
  * source: github.com/gregberge/react-merge-refs
  */
-function mergeRefs<T = any>(
+function mergeRefs<T = unknown>(
   refs: Array<React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null>,
 ): React.RefCallback<T> {
   return (value) => {
@@ -86,6 +86,16 @@ export function getGuestFrame<T extends z.Schema<unknown>>({
   });
 }
 
+enum MessageType {
+  Ready = 'ready',
+  Change = 'change',
+}
+
+const eventPayloadSchema = z.object({
+  type: z.nativeEnum(MessageType),
+  value: z.any(),
+});
+
 export const getHost = function <T extends z.Schema<unknown>>({
   schema,
   initial,
@@ -95,7 +105,7 @@ export const getHost = function <T extends z.Schema<unknown>>({
   initial: z.infer<T>;
   targetOrigin?: string;
 }) {
-  let value: T | undefined;
+  let value: z.infer<T> | undefined;
   const attributes = schema.parse(initial);
 
   function getSnapshot(): z.infer<T> {
@@ -115,21 +125,30 @@ export const getHost = function <T extends z.Schema<unknown>>({
     if (event.data.source === 'react-devtools-content-script') {
       return;
     }
+
     // check that the event doesn't come from this window
     if (event.source === window) {
       return;
     }
 
-    if (event.data.type === 'ready') {
+    const payload = eventPayloadSchema.safeParse(event.data);
+    if (!payload.success) {
       return;
     }
 
-    if (event.data.type === 'change') {
-      value = event.data.value;
-      const newAttributes = schema.parse(event.data.value);
+    if (payload.data.type === MessageType.Ready) {
+      return;
+    }
 
+    if (payload.data.type === 'change') {
+      const newAttributes = schema.safeParse(payload.data.value);
+      if (!newAttributes.success) {
+        return;
+      }
+
+      value = newAttributes.data;
       for (const listener of listeners) {
-        listener(newAttributes);
+        listener(value);
       }
     }
   }
@@ -148,6 +167,10 @@ export const getHost = function <T extends z.Schema<unknown>>({
   return {
     useHostProps(): z.infer<T> {
       return useSyncExternalStore(subscribe, getSnapshot);
+    },
+    dispatchChange(value: z.infer<T>) {
+      const message = { type: MessageType.Change, value };
+      window.parent.postMessage(message, targetOrigin);
     },
   };
 };
