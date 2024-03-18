@@ -59,9 +59,9 @@ const schema = z.object({
 const { useHostProps } = getHost({
   schema,
   // the origin of the host
-  origin: "http://host-url.com",
+  targetOrigin: "http://host-url.com",
   // initial state to use before the host sends data
-  initialState: {
+  initial: {
     name: "Alex",
     age: 50,
     email: "alex@example.com"
